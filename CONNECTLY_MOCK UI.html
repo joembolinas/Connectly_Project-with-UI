@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connectly Mock UI</title>
+    <style>
+        /* Basic Reset & Body */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #1c1e21;
+            line-height: 1.4;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #ffffff;
+            padding: 10px 20px;
+            border-bottom: 1px solid #dddfe2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5em;
+            color: #1877f2; /* Facebook Blue */
+            text-decoration: none;
+            margin-right: 20px; /* Add margin */
+        }
+        .navbar-search {
+            position: relative; /* For positioning results */
+            flex-grow: 0.5; /* Allow search to take some space */
+            max-width: 400px;
+             margin: 0 15px; /* Add horizontal margin */
+        }
+        .navbar-search input {
+            width: 100%;
+            padding: 8px 15px;
+            border-radius: 20px; /* Rounded */
+            border: none;
+            background-color: #f0f2f5; /* Light grey background */
+            font-size: 0.95em;
+        }
+        .navbar-search input:focus {
+            outline: none;
+            background-color: #e4e6eb;
+        }
+        #search-results {
+            display: none; /* Hidden by default */
+            position: absolute;
+            top: 110%; /* Position below input */
+            left: 0;
+            right: 0;
+            background-color: white;
+            border: 1px solid #dddfe2;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 110; /* Above navbar content */
+        }
+        .search-result-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+             border-bottom: 1px solid #f0f2f5;
+        }
+         .search-result-item:last-child {
+             border-bottom: none;
+         }
+        .search-result-item:hover {
+            background-color: #f0f2f5;
+        }
+        .search-result-item span {
+             font-weight: 500;
+        }
+         .search-result-item .username {
+             color: #65676b;
+             font-size: 0.9em;
+             margin-left: 8px;
+         }
+         .search-no-results {
+             padding: 15px;
+             text-align: center;
+             color: #65676b;
+             font-style: italic;
+         }
+
+        .navbar-links {
+            display: flex; /* Align items */
+            align-items: center;
+        }
+        .navbar-links a, .navbar-user button {
+            margin-left: 15px;
+            text-decoration: none;
+            color: #1c1e21;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1em;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+        .navbar-links a:hover, .navbar-user button:hover {
+            background-color: #f0f2f5;
+        }
+        .navbar-user {
+            display: flex; /* Align items */
+            align-items: center;
+            margin-left: auto; /* Push user section to the right */
+        }
+        .navbar-user span {
+            margin-right: 10px;
+            font-weight: 500;
+        }
+
+
+        /* Main Container */
+        .container {
+            max-width: 800px; /* Centered content */
+            margin: 20px auto;
+            padding: 0 15px;
+            flex-grow: 1;
+            width: 100%;
+        }
+
+        /* Views */
+        .view { display: none; }
+        .view.active { display: block; }
+
+        /* Forms */
+        .form-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: 40px auto;
+        }
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #1c1e21;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="password"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #dddfe2;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+         .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+         }
+        .form-container button {
+            width: 100%;
+            padding: 12px;
+            background-color: #1877f2;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .form-container button:hover {
+            background-color: #166fe5;
+        }
+        .form-container .switch-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .form-container .switch-link a {
+            color: #1877f2;
+            text-decoration: none;
+        }
+        .form-container .switch-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Posts */
+         .post-form-container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+         }
+        .post-card {
+            background-color: #ffffff;
+            border: 1px solid #dddfe2;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .post-header {
+            padding: 15px 15px 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .post-author {
+            font-weight: 600;
+            color: #050505;
+        }
+        .post-author a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .post-author a:hover {
+            text-decoration: underline;
+        }
+        .post-meta {
+            font-size: 0.85em;
+            color: #65676b;
+        }
+        .post-privacy-indicator {
+            font-size: 0.8em;
+            background-color: #e4e6eb;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-left: 5px;
+        }
+        .post-actions-menu {
+            position: relative;
+        }
+         .post-actions-button {
+             background: none;
+             border: none;
+             font-size: 1.2em;
+             cursor: pointer;
+             color: #65676b;
+             padding: 5px;
+         }
+         .post-actions-dropdown {
+             display: none;
+             position: absolute;
+             right: 0;
+             top: 100%;
+             background-color: white;
+             border: 1px solid #ccc;
+             border-radius: 6px;
+             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+             z-index: 10;
+             min-width: 100px;
+         }
+         .post-actions-dropdown button {
+             display: block;
+             width: 100%;
+             padding: 8px 12px;
+             text-align: left;
+             background: none;
+             border: none;
+             cursor: pointer;
+             font-size: 0.9em;
+         }
+         .post-actions-dropdown button:hover {
+             background-color: #f0f2f5;
+         }
+        .post-content {
+            padding: 15px;
+            font-size: 1.05em;
+            white-space: pre-wrap; /* Preserve line breaks */
+            word-wrap: break-word;
+        }
+        .post-footer {
+            padding: 10px 15px;
+            border-top: 1px solid #f0f2f5;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .post-footer button {
+            background: none;
+            border: none;
+            color: #606770;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            font-size: 0.9em;
+        }
+        .post-footer button:hover {
+            background-color: #f2f3f5;
+        }
+        .post-footer button.liked {
+            color: #1877f2; /* Blue when liked */
+        }
+         .post-footer button svg {
+             margin-right: 6px;
+             width: 18px;
+             height: 18px;
+         }
+         .post-footer span { /* For counts */
+            margin-left: 5px;
+         }
+
+        /* Comments */
+        .comments-section {
+            padding: 0 15px 15px 15px;
+            border-top: 1px solid #f0f2f5;
+            margin-top: 10px;
+        }
+        .comment {
+            margin-top: 10px;
+            padding: 8px;
+            background-color: #f0f2f5;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+        .comment-author {
+            font-weight: 600;
+             margin-right: 5px;
+        }
+         .comment-author a {
+            text-decoration: none;
+            color: inherit;
+         }
+         .comment-author a:hover {
+            text-decoration: underline;
+         }
+        .comment-content {
+            margin-left: 5px;
+            word-wrap: break-word;
+        }
+        .comment-form {
+            display: flex;
+            margin-top: 10px;
+        }
+        .comment-form input {
+            flex-grow: 1;
+            padding: 8px 10px;
+            border: 1px solid #ccd0d5;
+            border-radius: 15px;
+            margin-right: 5px;
+        }
+        .comment-form button {
+            padding: 8px 15px;
+            background-color: #1877f2;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .comment-form button:hover {
+             background-color: #166fe5;
+        }
+
+        /* Profile */
+        .profile-header {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .profile-header h2 {
+            margin: 0;
+            font-size: 1.8em;
+        }
+        .profile-header p {
+            color: #65676b;
+            margin-top: 5px;
+        }
+        .profile-stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .profile-stats span {
+            font-size: 0.9em;
+            color: #65676b;
+        }
+        .profile-stats strong {
+            color: #050505;
+        }
+         .profile-actions button {
+            margin-top: 15px;
+            padding: 8px 15px;
+            background-color: #e4e6eb;
+            color: #050505;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+         }
+         .profile-actions button:hover {
+            background-color: #d8dadf;
+         }
+         .profile-actions button.following {
+            background-color: #1877f2;
+            color: white;
+         }
+          .profile-actions button.following:hover {
+            background-color: #166fe5;
+          }
+
+        /* User List */
+        .user-list-item {
+            background-color: #fff;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+         .user-list-item .user-info a {
+             font-weight: 600;
+             text-decoration: none;
+             color: #050505;
+         }
+          .user-list-item .user-info a:hover {
+            text-decoration: underline;
+          }
+          .user-list-item .user-info span {
+            display: block;
+            font-size: 0.9em;
+            color: #65676b;
+          }
+        .user-list-item button {
+            padding: 6px 12px;
+            font-size: 0.9em;
+            border-radius: 6px;
+            border: 1px solid #ccd0d5;
+            background-color: #f5f6f7;
+            color: #4b4f56;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .user-list-item button:hover {
+            background-color: #e9ebee;
+        }
+         .user-list-item button.following {
+             border-color: #1877f2;
+             background-color: #e7f3ff;
+             color: #1877f2;
+         }
+          .user-list-item button.following:hover {
+             background-color: #dcebff;
+          }
+
+        /* Status Messages */
+        .status-message {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            border-radius: 6px;
+            color: #fff;
+            font-weight: 500;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .status-message.show {
+            opacity: 1;
+        }
+        .status-message.success { background-color: #42b72a; } /* Green */
+        .status-message.error { background-color: #f02849; } /* Red */
+        .status-message.info { background-color: #1877f2; } /* Blue */
+
+        /* Utility */
+        .hidden { display: none; }
+        .text-center { text-align: center; }
+        .mt-1 { margin-top: 1rem; }
+        .mb-1 { margin-bottom: 1rem; }
+
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="#" class="navbar-brand" onclick="showFeedView()">Connectly</a>
+
+        <div class="navbar-search">
+             <input type="search" id="user-search-input" placeholder="Search users...">
+             <div id="search-results">
+                 <!-- Search results dropdown -->
+             </div>
+        </div>
+
+        <div class="navbar-links">
+            <!-- Links appear when logged in -->
+        </div>
+        <div class="navbar-user">
+            <!-- User info and logout appear when logged in -->
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <!-- Login View -->
+        <div id="login-view" class="view form-container">
+            <h2>Login to Connectly</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button type="submit">Log In</button>
+            </form>
+            <p class="switch-link">Don't have an account? <a href="#" onclick="showRegisterView()">Register</a></p>
+            </div>
+
+        <!-- Register View -->
+        <div id="register-view" class="view form-container">
+            <h2>Register for Connectly</h2>
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="register-username">Username</label>
+                    <input type="text" id="register-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" required>
+                </div>
+                 <div class="form-group">
+                    <label for="register-password2">Confirm Password</label>
+                    <input type="password" id="register-password2" required>
+                </div>
+                <button type="submit">Register</button>
+            </form>
+            <p class="switch-link">Already have an account? <a href="#" onclick="showLoginView()">Log In</a></p>
+        </div>
+
+        <!-- Feed View -->
+        <div id="feed-view" class="view">
+            <div class="post-form-container">
+                 <h3>Create Post</h3>
+                 <form id="create-post-form">
+                     <div class="form-group">
+                         <textarea id="post-content" placeholder="What's on your mind?" required></textarea>
+                     </div>
+                      <div class="form-group" style="display: flex; align-items: center; justify-content: space-between;">
+                          <label for="post-privacy" style="margin-bottom: 0; margin-right: 10px;">Privacy:</label>
+                          <select id="post-privacy">
+                              <option value="public">Public</option>
+                              <option value="private">Private (Only Me)</option>
+                          </select>
+                          <button type="submit" style="width: auto; margin-left: 10px; padding: 8px 15px; font-size: 0.9em;">Post</button>
+                      </div>
+                 </form>
+            </div>
+            <h2>Feed</h2>
+            <div id="feed-posts">
+                <!-- Posts will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Profile View -->
+        <div id="profile-view" class="view">
+             <div class="profile-header">
+                 <h2 id="profile-username"></h2>
+                 <p id="profile-email"></p>
+                 <p id="profile-joined"></p>
+                 <div class="profile-stats">
+                     <span id="profile-post-count"></span>
+                     <span id="profile-follower-count"></span>
+                     <span id="profile-following-count"></span>
+                 </div>
+                 <div class="profile-actions">
+                     <button id="follow-button" onclick="handleFollowUnfollow()"></button>
+                     <!-- Edit Profile button could go here -->
+                 </div>
+             </div>
+             <h3>Posts by <span id="profile-posts-heading-username"></span></h3>
+             <div id="profile-posts">
+                <!-- User's posts will be loaded here -->
+            </div>
+        </div>
+
+         <!-- User List View -->
+         <div id="user-list-view" class="view">
+             <h2>Users</h2>
+             <div id="user-list">
+                 <!-- User list items will be loaded here -->
+             </div>
+         </div>
+
+    </div>
+
+    <div id="status-message" class="status-message"></div>
+
+    <!-- SVG Icons -->
+    <svg width="0" height="0" style="position:absolute">
+      <symbol viewBox="0 0 24 24" id="icon-like">
+        <path d="M7 21h2v-2H7v2zm12.5-9c-.2-.5-.7-.8-1.2-.8H16v-5c0-1.1-.9-2-2-2h-2c-.5 0-1 .2-1.4.6L7.2 9H3c-.6 0-1 .4-1 1v9c0 .6.4 1 1 1h11l3.4-7.2c.1-.3.1-.5.1-.8-.1-.1-.1-.1 0 0zM5 19V11h2v8H5zm13.1-8.5l-3.4 7.2H9V10l3.6-4.4c.2-.2.4-.4.7-.4h1.7v5h2.3l1.2 2.5z"></path>
+      </symbol>
+       <symbol viewBox="0 0 24 24" id="icon-comment">
+         <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"></path>
+       </symbol>
+       <symbol viewBox="0 0 24 24" id="icon-options">
+         <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path>
+       </symbol>
+        <symbol viewBox="0 0 24 24" id="icon-delete">
+          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path>
+        </symbol>
+        <symbol viewBox="0 0 24 24" id="icon-edit">
+            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path>
+        </symbol>
+    </svg>
+
+
+    <script>
+        // --- Global State & Data ---
+        let currentUser = null; // { id, username, email, role, firstName, lastName, token? }
+        let currentView = 'login'; // 'login', 'register', 'feed', 'profile', 'user-list'
+        let currentProfileUserId = null; // For profile view
+        let searchDebounceTimer = null; // For debouncing search input
+
+        // --- Mock Data (Simulates Database) ---
+        let users = [
+            { id: 1, username: 'admin', email: 'admin@example.com', password: 'password', role: 'admin', firstName: 'Admin', lastName: 'User', dateJoined: new Date(2024, 0, 1).toISOString() },
+            { id: 2, username: 'johndoe', email: 'john@example.com', password: 'password', role: 'user', firstName: 'John', lastName: 'Doe', dateJoined: new Date(2024, 1, 15).toISOString() },
+            { id: 3, username: 'janedoe', email: 'jane@example.com', password: 'password', role: 'user', firstName: 'Jane', lastName: 'Doe', dateJoined: new Date(2024, 2, 10).toISOString() }
+        ];
+        let posts = [
+            { id: 101, authorId: 2, content: 'Just setting up my Connectly account! #FirstPost', privacy: 'public', createdAt: new Date(Date.now() - 86400000 * 2).toISOString() }, // 2 days ago
+            { id: 102, authorId: 3, content: 'Loving the weather today! ☀️', privacy: 'public', createdAt: new Date(Date.now() - 86400000).toISOString() }, // 1 day ago
+            { id: 103, authorId: 2, content: 'Working on a cool project. Can\'t share details yet! 😉', privacy: 'private', createdAt: new Date(Date.now() - 3600000 * 5).toISOString() }, // 5 hours ago
+            { id: 104, authorId: 1, content: 'Admin post: Welcome everyone to Connectly!', privacy: 'public', createdAt: new Date(Date.now() - 3600000 * 2).toISOString() } // 2 hours ago
+        ];
+        let comments = [
+            { id: 201, postId: 101, authorId: 3, content: 'Welcome John!', createdAt: new Date(Date.now() - 86400000 * 1.9).toISOString() },
+            { id: 202, postId: 102, authorId: 2, content: 'Looks amazing!', createdAt: new Date(Date.now() - 86400000 * 0.9).toISOString() },
+            { id: 203, postId: 104, authorId: 2, content: 'Thanks Admin!', createdAt: new Date(Date.now() - 3600000 * 1.5).toISOString() }
+        ];
+        let likes = [
+            { userId: 3, postId: 101 },
+            { userId: 1, postId: 101 },
+            { userId: 2, postId: 102 },
+            { userId: 1, postId: 102 },
+            { userId: 3, postId: 104 },
+        ];
+        let follows = [
+            { followerId: 2, followedId: 3 }, // John follows Jane
+            { followerId: 3, followedId: 2 }, // Jane follows John
+            { followerId: 2, followedId: 1 }, // John follows Admin
+            { followerId: 3, followedId: 1 }, // Jane follows Admin
+        ];
+        let nextUserId = 4;
+        let nextPostId = 105;
+        let nextCommentId = 204;
+
+        // --- DOM Elements ---
+        const views = {
+            login: document.getElementById('login-view'),
+            register: document.getElementById('register-view'),
+            feed: document.getElementById('feed-view'),
+            profile: document.getElementById('profile-view'),
+            userList: document.getElementById('user-list-view')
+        };
+        const navbarLinks = document.querySelector('.navbar-links');
+        const navbarUser = document.querySelector('.navbar-user');
+        const statusMessage = document.getElementById('status-message');
+        const searchInput = document.getElementById('user-search-input');
+        const searchResultsContainer = document.getElementById('search-results');
+        const navbarSearchContainer = document.querySelector('.navbar-search');
+
+
+        // --- Utility Functions ---
+        function findUserById(id) { return users.find(u => u.id === id); }
+        function findUserByUsername(username) { return users.find(u => u.username === username); }
+        function findPostById(id) { return posts.find(p => p.id === id); }
+        function getCommentsForPost(postId) { return comments.filter(c => c.postId === postId).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); }
+        function getLikesForPost(postId) { return likes.filter(l => l.postId === postId); }
+        function userHasLikedPost(userId, postId) { return likes.some(l => l.userId === userId && l.postId === postId); }
+        function getFollowers(userId) { return follows.filter(f => f.followedId === userId); }
+        function getFollowing(userId) { return follows.filter(f => f.followerId === userId); }
+        function isFollowing(followerId, followedId) { return follows.some(f => f.followerId === followerId && f.followedId === followedId); }
+        function getPostsByUser(userId) { return posts.filter(p => p.authorId === userId).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); }
+
+        function displayStatusMessage(message, type = 'info', duration = 3000) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${type}`; // Reset classes
+            statusMessage.classList.add('show');
+            setTimeout(() => {
+                statusMessage.classList.remove('show');
+            }, duration);
+        }
+
+        function formatDate(isoString) {
+            const date = new Date(isoString);
+            const seconds = Math.floor((new Date() - date) / 1000);
+             let interval = seconds / 31536000;
+             if (interval > 1) return Math.floor(interval) + "y ago";
+             interval = seconds / 2592000;
+             if (interval > 1) return Math.floor(interval) + "mo ago";
+             interval = seconds / 86400;
+             if (interval > 1) return Math.floor(interval) + "d ago";
+             interval = seconds / 3600;
+             if (interval > 1) return Math.floor(interval) + "h ago";
+             interval = seconds / 60;
+             if (interval > 1) return Math.floor(interval) + "m ago";
+             return Math.floor(seconds) < 5 ? "just now" : Math.floor(seconds) + "s ago";
+        }
+
+         function canEditOrDelete(itemAuthorId) {
+            if (!currentUser) return false;
+            return currentUser.role === 'admin' || itemAuthorId === currentUser.id;
+         }
+
+        // Debounce function
+        function debounce(func, delay) {
+            let timeoutId;
+            return function(...args) {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => {
+                    func.apply(this, args);
+                }, delay);
+            };
+        }
+
+
+        // --- View Switching Logic ---
+        function showView(viewName) {
+            Object.values(views).forEach(view => view.classList.remove('active'));
+            if (views[viewName]) {
+                views[viewName].classList.add('active');
+                currentView = viewName;
+                window.scrollTo(0, 0);
+                 hideSearchResults(); // Hide search results when changing main view
+            } else {
+                console.error(`View "${viewName}" not found.`);
+                showView('login'); // Fallback
+            }
+            updateNavbar();
+        }
+
+        // --- Rendering Functions ---
+        function updateNavbar() {
+             navbarSearchContainer.style.display = currentUser ? 'block' : 'none'; // Show search only when logged in
+
+            if (currentUser) {
+                navbarLinks.innerHTML = `
+                    <a href="#" onclick="showFeedView()">Feed</a>
+                    <a href="#" onclick="showProfileView(${currentUser.id})">My Profile</a>
+                    <a href="#" onclick="showUserListView()">Users</a>
+                    ${currentUser.role === 'admin' ? '<a href="#" onclick="alert(\'Admin Dashboard Mock\')">Admin</a>' : ''}
+                `;
+                navbarUser.innerHTML = `
+                    <span>${currentUser.username} (${currentUser.role})</span>
+                    <button onclick="handleLogout()">Logout</button>
+                `;
+            } else {
+                navbarLinks.innerHTML = '';
+                navbarUser.innerHTML = `
+                    <button onclick="showLoginView()">Login</button>
+                    <button onclick="showRegisterView()">Register</button>
+                `;
+            }
+        }
+
+        function renderFeed() {
+            if (!currentUser) return; // Should not happen if called correctly
+
+            const feedPostsContainer = document.getElementById('feed-posts');
+            feedPostsContainer.innerHTML = 'Loading...'; // Placeholder
+
+            // Simulate API call delay
+            setTimeout(() => {
+                 // Filter posts: show posts from followed users + own posts that are public or private
+                 const followedUserIds = getFollowing(currentUser.id).map(f => f.followedId);
+                 const feedPostIds = new Set();
+
+                 posts.forEach(post => {
+                     const isOwnPost = post.authorId === currentUser.id;
+                     const isFollowedPost = followedUserIds.includes(post.authorId);
+
+                     // Visibility check based on documentation logic
+                     const isVisible = post.privacy === 'public' || (post.privacy === 'private' && isOwnPost);
+
+                     // If user follows the author OR it's their own post, and it's visible
+                     if ((isFollowedPost || isOwnPost) && isVisible) {
+                         feedPostIds.add(post.id);
+                     }
+                 });
+
+                const visiblePosts = posts
+                    .filter(post => feedPostIds.has(post.id))
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+
+                if (visiblePosts.length === 0) {
+                     feedPostsContainer.innerHTML = '<p class="text-center mt-1">Your feed is empty. Follow some users or create a post!</p>';
+                     return;
+                }
+
+                feedPostsContainer.innerHTML = visiblePosts.map(post => renderPostCard(post)).join('');
+                attachPostActionListeners(); // Re-attach listeners after rendering
+            }, 200); // 200ms delay simulation
+        }
+
+        function renderProfile(userId) {
+             const user = findUserById(userId);
+             if (!user) {
+                 displayStatusMessage(`User with ID ${userId} not found.`, 'error');
+                 showFeedView(); // Redirect to feed
+                 return;
+             }
+
+             currentProfileUserId = userId; // Keep track of whose profile we are viewing
+
+             // Populate header
+             document.getElementById('profile-username').textContent = user.username;
+             document.getElementById('profile-email').textContent = user.email;
+             document.getElementById('profile-joined').textContent = `Joined: ${formatDate(user.dateJoined)}`;
+             document.getElementById('profile-posts-heading-username').textContent = user.username;
+
+             const userPosts = getPostsByUser(userId);
+             const followerCount = getFollowers(userId).length;
+             const followingCount = getFollowing(userId).length;
+
+             document.getElementById('profile-post-count').innerHTML = `<strong>${userPosts.length}</strong> Posts`;
+             document.getElementById('profile-follower-count').innerHTML = `<strong>${followerCount}</strong> Followers`;
+             document.getElementById('profile-following-count').innerHTML = `<strong>${followingCount}</strong> Following`;
+
+            // Follow/Unfollow Button Logic
+            const followButton = document.getElementById('follow-button');
+            if (currentUser && currentUser.id !== userId) {
+                followButton.classList.remove('hidden');
+                if (isFollowing(currentUser.id, userId)) {
+                    followButton.textContent = 'Unfollow';
+                    followButton.classList.add('following');
+                } else {
+                    followButton.textContent = 'Follow';
+                     followButton.classList.remove('following');
+                }
+            } else {
+                followButton.classList.add('hidden'); // Hide button if viewing own profile or not logged in
+            }
+
+
+             // Populate posts
+             const profilePostsContainer = document.getElementById('profile-posts');
+             profilePostsContainer.innerHTML = 'Loading...';
+
+             setTimeout(() => {
+                 // Filter posts for visibility ON the profile page
+                 const visiblePosts = userPosts.filter(post => {
+                     if (post.privacy === 'public') return true;
+                     if (post.privacy === 'private' && currentUser && post.authorId === currentUser.id) return true;
+                     // Admins/Mods could potentially see private here too, based on your rules
+                     if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'moderator')) return true;
+                     return false;
+                 });
+
+                 if (visiblePosts.length === 0) {
+                     profilePostsContainer.innerHTML = `<p class="text-center mt-1">${user.username} hasn't posted anything visible yet.</p>`;
+                 } else {
+                     profilePostsContainer.innerHTML = visiblePosts.map(post => renderPostCard(post)).join('');
+                     attachPostActionListeners();
+                 }
+             }, 150);
+        }
+
+        function renderUserList() {
+             const userListContainer = document.getElementById('user-list');
+             userListContainer.innerHTML = 'Loading...';
+
+             setTimeout(() => {
+                 // Exclude the current user from the list
+                 const otherUsers = users.filter(u => currentUser && u.id !== currentUser.id);
+
+                 if (otherUsers.length === 0) {
+                     userListContainer.innerHTML = '<p>No other users found.</p>';
+                     return;
+                 }
+
+                 userListContainer.innerHTML = otherUsers.map(user => {
+                     const following = currentUser ? isFollowing(currentUser.id, user.id) : false;
+                     return `
+                         <div class="user-list-item" data-user-id="${user.id}">
+                             <div class="user-info">
+                                <a href="#" onclick="event.preventDefault(); showProfileView(${user.id})">${user.username}</a>
+                                <span>${user.firstName || ''} ${user.lastName || ''} (${user.role})</span>
+                             </div>
+                             <button class="follow-button ${following ? 'following' : ''}" onclick="handleFollowToggleFromList(${user.id}, this)">
+                                 ${following ? 'Unfollow' : 'Follow'}
+                             </button>
+                         </div>
+                     `;
+                 }).join('');
+             }, 100);
+         }
+
+        function renderPostCard(post) {
+            const author = findUserById(post.authorId);
+            const postLikes = getLikesForPost(post.id);
+            const postComments = getCommentsForPost(post.id); // Get sorted comments
+            const likedByCurrentUser = currentUser ? userHasLikedPost(currentUser.id, post.id) : false;
+            const showActions = currentUser && canEditOrDelete(post.authorId);
+
+            return `
+                <div class="post-card" id="post-${post.id}">
+                    <div class="post-header">
+                        <div>
+                            <span class="post-author">
+                                <a href="#" onclick="event.preventDefault(); showProfileView(${author.id})">${author ? author.username : 'Unknown User'}</a>
+                            </span>
+                            <span class="post-meta">
+                                • ${formatDate(post.createdAt)}
+                                ${post.privacy !== 'public' ? `<span class="post-privacy-indicator">${post.privacy}</span>`: ''}
+                            </span>
+                        </div>
+                        ${showActions ? `
+                        <div class="post-actions-menu">
+                            <button class="post-actions-button" onclick="togglePostActionsDropdown(${post.id})">
+                                <svg><use href="#icon-options"/></svg>
+                            </button>
+                            <div class="post-actions-dropdown" id="actions-dropdown-${post.id}">
+                                ${post.authorId === currentUser.id ? `<button onclick="handleEditPost(${post.id})"><svg width="14" height="14" style="vertical-align: middle; margin-right: 5px;"><use href="#icon-edit"/></svg> Edit</button>` : ''}
+                                <button onclick="handleDeletePost(${post.id})"><svg width="14" height="14" style="vertical-align: middle; margin-right: 5px;"><use href="#icon-delete"/></svg> Delete</button>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div class="post-content">${escapeHtml(post.content)}</div>
+                    <div class="post-footer">
+                        <button class="like-button ${likedByCurrentUser ? 'liked' : ''}" data-post-id="${post.id}">
+                           <svg><use href="#icon-like"/></svg> Like <span class="like-count">${postLikes.length}</span>
+                        </button>
+                        <button class="comment-button" data-post-id="${post.id}">
+                            <svg><use href="#icon-comment"/></svg> Comment <span class="comment-count">${postComments.length}</span>
+                        </button>
+                        </div>
+                    <div class="comments-section hidden" id="comments-for-${post.id}">
+                         <h4>Comments</h4>
+                         <div class="comment-list">
+                             ${postComments.map(comment => renderComment(comment)).join('')}
+                         </div>
+                         <form class="comment-form" data-post-id="${post.id}">
+                             <input type="text" placeholder="Write a comment..." required>
+                             <button type="submit">Post</button>
+                         </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderComment(comment) {
+             const author = findUserById(comment.authorId);
+             const showActions = currentUser && canEditOrDelete(comment.authorId); // Can user delete/edit this comment?
+             return `
+                 <div class="comment" id="comment-${comment.id}">
+                     <span class="comment-author"><a href="#" onclick="event.preventDefault(); showProfileView(${author.id})">${author ? author.username : 'Unknown'}</a>:</span>
+                     <span class="comment-content">${escapeHtml(comment.content)}</span>
+                     ${showActions ? `
+                        <span style="margin-left: 10px; font-size: 0.8em;">
+                            ${comment.authorId === currentUser.id ? `<a href="#" onclick="handleEditComment(${comment.id}, ${comment.postId})" style="color: #65676b; margin-right: 5px;">Edit</a>` : ''}
+                            <a href="#" onclick="handleDeleteComment(${comment.id}, ${comment.postId})" style="color: #f02849;">Delete</a>
+                        </span>
+                     ` : ''}
+                     <span style="font-size: 0.8em; color: #65676b; display: block; text-align: right;">${formatDate(comment.createdAt)}</span>
+                 </div>
+             `;
+         }
+
+         function renderSearchResults(results) {
+             if (results.length === 0) {
+                 searchResultsContainer.innerHTML = '<div class="search-no-results">No users found.</div>';
+             } else {
+                // Limit results displayed
+                 const limitedResults = results.slice(0, 8);
+                 searchResultsContainer.innerHTML = limitedResults.map(user => `
+                     <div class="search-result-item" onclick="navigateToProfile(${user.id})">
+                         <span>${user.firstName || ''} ${user.lastName || ''}</span>
+                         <span class="username">(${user.username})</span>
+                     </div>
+                 `).join('');
+             }
+             searchResultsContainer.style.display = 'block';
+         }
+
+        // --- Event Handlers ---
+        function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            // Simulate API call
+            const user = findUserByUsername(username);
+            if (user && user.password === password) { // Simple password check (DO NOT DO THIS IN REAL APP)
+                currentUser = { ...user }; // Simulate getting user data back
+                displayStatusMessage(`Welcome back, ${currentUser.username}!`, 'success');
+                showFeedView();
+            } else {
+                displayStatusMessage('Invalid username or password.', 'error');
+            }
+             document.getElementById('login-form').reset();
+        }
+
+        function handleRegister(event) {
+            event.preventDefault();
+            const username = document.getElementById('register-username').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+             const password2 = document.getElementById('register-password2').value;
+
+            if (password !== password2) {
+                displayStatusMessage("Passwords don't match.", 'error');
+                return;
+            }
+            if (findUserByUsername(username)) {
+                 displayStatusMessage("Username already exists.", 'error');
+                 return;
+            }
+             if (users.some(u => u.email === email)) {
+                 displayStatusMessage("Email already registered.", 'error');
+                 return;
+             }
+
+            // Simulate successful registration
+            const newUser = {
+                id: nextUserId++,
+                username: username,
+                email: email,
+                password: password, // Store plain text (BAD PRACTICE!)
+                role: 'user', // Default role
+                firstName: '',
+                lastName: '',
+                dateJoined: new Date().toISOString()
+            };
+            users.push(newUser);
+            displayStatusMessage('Registration successful! Please log in.', 'success');
+            showLoginView();
+             document.getElementById('register-form').reset();
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            currentProfileUserId = null;
+            displayStatusMessage('You have been logged out.', 'info');
+            showLoginView();
+            hideSearchResults(); // Hide search results on logout
+            searchInput.value = ''; // Clear search input
+        }
+
+        function handleCreatePost(event) {
+            event.preventDefault();
+            if (!currentUser) return;
+
+            const content = document.getElementById('post-content').value.trim();
+            const privacy = document.getElementById('post-privacy').value;
+
+            if (!content) {
+                displayStatusMessage('Post content cannot be empty.', 'error');
+                return;
+            }
+
+            // Simulate API call
+            const newPost = {
+                id: nextPostId++,
+                authorId: currentUser.id,
+                content: content,
+                privacy: privacy,
+                createdAt: new Date().toISOString()
+            };
+            posts.unshift(newPost); // Add to beginning for immediate visibility
+
+            displayStatusMessage('Post created successfully!', 'success');
+            document.getElementById('create-post-form').reset(); // Reset form
+            renderFeed(); // Re-render the feed
+        }
+
+        function handleLikeToggle(postId) {
+            if (!currentUser) {
+                displayStatusMessage('You must be logged in to like posts.', 'error');
+                return;
+            }
+
+            const post = findPostById(postId);
+            if (!post) return;
+
+            const likeIndex = likes.findIndex(l => l.userId === currentUser.id && l.postId === postId);
+
+            if (likeIndex > -1) {
+                // Unlike
+                likes.splice(likeIndex, 1);
+            } else {
+                // Like
+                likes.push({ userId: currentUser.id, postId: postId });
+            }
+
+            // Update UI specifically for this post card
+            const postCard = document.getElementById(`post-${postId}`);
+            if (postCard) {
+                 const likeButton = postCard.querySelector('.like-button');
+                 const likeCountSpan = postCard.querySelector('.like-count');
+                 const postLikes = getLikesForPost(postId); // Get updated count
+
+                 likeCountSpan.textContent = postLikes.length;
+                 likeButton.classList.toggle('liked', likeIndex === -1); // Toggle based on whether it *was* liked before the click
+            }
+        }
+
+        function handleCommentSubmit(event) {
+            event.preventDefault();
+            if (!currentUser) return;
+
+            const form = event.target;
+            const postId = parseInt(form.dataset.postId);
+            const input = form.querySelector('input');
+            const content = input.value.trim();
+
+            if (!content) return;
+
+            const newComment = {
+                 id: nextCommentId++,
+                 postId: postId,
+                 authorId: currentUser.id,
+                 content: content,
+                 createdAt: new Date().toISOString()
+            };
+            comments.push(newComment);
+
+            // Update comment section UI
+             const commentsSection = document.getElementById(`comments-for-${postId}`);
+             const commentList = commentsSection.querySelector('.comment-list');
+             commentList.insertAdjacentHTML('beforeend', renderComment(newComment)); // Add new comment efficiently
+
+             // Update comment count on post footer
+             const postCard = document.getElementById(`post-${postId}`);
+             const commentCountSpan = postCard.querySelector('.comment-count');
+             const currentComments = getCommentsForPost(postId);
+             commentCountSpan.textContent = currentComments.length;
+
+
+            input.value = ''; // Clear input
+        }
+
+        function toggleComments(postId) {
+            const commentsSection = document.getElementById(`comments-for-${postId}`);
+             if(commentsSection) {
+                 commentsSection.classList.toggle('hidden');
+             }
+        }
+
+         function handleFollowUnfollow() {
+             // This relies on currentProfileUserId being set
+             if (!currentUser || !currentProfileUserId || currentUser.id === currentProfileUserId) return;
+             handleFollowToggle(currentProfileUserId);
+         }
+
+        function handleFollowToggle(targetUserId) {
+            if (!currentUser) return;
+
+            const isCurrentlyFollowing = isFollowing(currentUser.id, targetUserId);
+
+            if (isCurrentlyFollowing) {
+                 // Unfollow
+                 const followIndex = follows.findIndex(f => f.followerId === currentUser.id && f.followedId === targetUserId);
+                 if (followIndex > -1) {
+                     follows.splice(followIndex, 1);
+                     displayStatusMessage(`Unfollowed ${findUserById(targetUserId).username}.`, 'info');
+                 }
+            } else {
+                 // Follow
+                 if(currentUser.id === targetUserId) {
+                     displayStatusMessage('You cannot follow yourself.', 'error');
+                     return;
+                 }
+                 follows.push({ followerId: currentUser.id, followedId: targetUserId });
+                 displayStatusMessage(`Followed ${findUserById(targetUserId).username}.`, 'success');
+            }
+
+            // Re-render profile if currently viewing it
+            if (currentView === 'profile' && currentProfileUserId === targetUserId) {
+                 renderProfile(targetUserId);
+            }
+            // Re-render user list if currently viewing it
+            if (currentView === 'user-list') {
+                renderUserList(); // Simplest way to update button state
+            }
+             // Re-render feed because following changes feed content
+             if (currentView === 'feed') {
+                 renderFeed();
+             }
+        }
+
+         function handleFollowToggleFromList(targetUserId, buttonElement) {
+             if (!currentUser) return;
+             handleFollowToggle(targetUserId);
+         }
+
+         function togglePostActionsDropdown(postId) {
+            const dropdown = document.getElementById(`actions-dropdown-${postId}`);
+            if (dropdown) {
+                document.querySelectorAll('.post-actions-dropdown').forEach(d => {
+                    if (d.id !== dropdown.id) {
+                        d.style.display = 'none';
+                    }
+                });
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            }
+         }
+
+         function handleDeletePost(postId) {
+            if (!currentUser) return;
+            const post = findPostById(postId);
+            if (!post) return;
+
+            if (!canEditOrDelete(post.authorId)) {
+                displayStatusMessage('You do not have permission to delete this post.', 'error');
+                return;
+            }
+
+             if (confirm(`Are you sure you want to delete this post?`)) {
+                 const index = posts.findIndex(p => p.id === postId);
+                 if (index > -1) {
+                     posts.splice(index, 1);
+                     likes = likes.filter(l => l.postId !== postId);
+                     comments = comments.filter(c => c.postId !== postId);
+                     displayStatusMessage('Post deleted successfully.', 'success');
+                     if (currentView === 'feed') renderFeed();
+                      else if (currentView === 'profile') renderProfile(currentProfileUserId);
+                 } else {
+                      displayStatusMessage('Post not found (already deleted?).', 'error');
+                 }
+            }
+             const dropdown = document.getElementById(`actions-dropdown-${postId}`);
+             if (dropdown) dropdown.style.display = 'none';
+         }
+
+         function handleEditPost(postId) {
+             if (!currentUser) return;
+             const post = findPostById(postId);
+             if (!post || post.authorId !== currentUser.id) {
+                 displayStatusMessage('Cannot edit this post.', 'error');
+                 return;
+             }
+
+             const newContent = prompt("Edit your post:", post.content);
+             if (newContent !== null && newContent.trim() !== post.content) {
+                 post.content = newContent.trim();
+                 displayStatusMessage('Post updated.', 'success');
+                  if (currentView === 'feed') renderFeed();
+                  else if (currentView === 'profile') renderProfile(currentProfileUserId);
+             }
+             const dropdown = document.getElementById(`actions-dropdown-${postId}`);
+             if (dropdown) dropdown.style.display = 'none';
+         }
+
+         function handleDeleteComment(commentId, postId) {
+             if (!currentUser) return;
+             const commentIndex = comments.findIndex(c => c.id === commentId);
+             if (commentIndex === -1) return;
+             const comment = comments[commentIndex];
+             if (!canEditOrDelete(comment.authorId)) {
+                  displayStatusMessage('You cannot delete this comment.', 'error');
+                  return;
+             }
+             if (confirm('Delete this comment?')) {
+                 comments.splice(commentIndex, 1);
+                 displayStatusMessage('Comment deleted.', 'success');
+                 const commentElement = document.getElementById(`comment-${commentId}`);
+                 if (commentElement) commentElement.remove();
+                 const postCard = document.getElementById(`post-${postId}`);
+                 const commentCountSpan = postCard?.querySelector('.comment-count');
+                 if (commentCountSpan) {
+                     const currentComments = getCommentsForPost(postId);
+                     commentCountSpan.textContent = currentComments.length;
+                 }
+             }
+         }
+
+        function handleEditComment(commentId, postId) {
+             if (!currentUser) return;
+             const commentIndex = comments.findIndex(c => c.id === commentId);
+             if (commentIndex === -1) return;
+             const comment = comments[commentIndex];
+             if (comment.authorId !== currentUser.id) {
+                 displayStatusMessage('You cannot edit this comment.', 'error');
+                 return;
+             }
+             const newContent = prompt("Edit your comment:", comment.content);
+             if (newContent !== null && newContent.trim() !== comment.content && newContent.trim() !== '') {
+                 comment.content = newContent.trim();
+                 comment.createdAt = new Date().toISOString(); // Optional: Update timestamp
+                 displayStatusMessage('Comment updated.', 'success');
+                  const commentElement = document.getElementById(`comment-${commentId}`);
+                  const commentList = document.querySelector(`#comments-for-${postId} .comment-list`);
+                  if (commentElement && commentList) {
+                       commentElement.outerHTML = renderComment(comment); // Replace the element
+                  } else {
+                       const commentsSection = document.getElementById(`comments-for-${postId}`);
+                       if (commentsSection) {
+                            const currentComments = getCommentsForPost(postId);
+                            commentsSection.querySelector('.comment-list').innerHTML = currentComments.map(c => renderComment(c)).join('');
+                       }
+                  }
+             }
+         }
+
+         function performSearch(query) {
+             if (!currentUser || !query || query.trim().length < 1) {
+                 hideSearchResults();
+                 return;
+             }
+             const lowerCaseQuery = query.toLowerCase();
+             const results = users.filter(user =>
+                 user.id !== currentUser.id && // Exclude self
+                 (user.username.toLowerCase().includes(lowerCaseQuery) ||
+                  (user.firstName && user.firstName.toLowerCase().includes(lowerCaseQuery)) ||
+                  (user.lastName && user.lastName.toLowerCase().includes(lowerCaseQuery)))
+             );
+             renderSearchResults(results);
+         }
+
+        // Debounced search handler
+        const debouncedSearch = debounce(performSearch, 300); // 300ms delay
+
+         function hideSearchResults() {
+             searchResultsContainer.style.display = 'none';
+             searchResultsContainer.innerHTML = ''; // Clear content
+         }
+
+         function navigateToProfile(userId) {
+             showProfileView(userId); // Navigate to profile
+             hideSearchResults(); // Hide results dropdown
+             searchInput.value = ''; // Clear search input
+         }
+
+
+        // --- Event Listeners Setup ---
+        function attachPostActionListeners() {
+             // Use event delegation on a parent container for efficiency
+             const feedContainer = document.getElementById('feed-posts');
+             const profileContainer = document.getElementById('profile-posts');
+
+             const delegateHandler = (event) => {
+                 // Like Button
+                 if (event.target.closest('.like-button')) {
+                     event.preventDefault();
+                     const button = event.target.closest('.like-button');
+                     const postId = parseInt(button.dataset.postId);
+                     handleLikeToggle(postId);
+                     return;
+                 }
+                 // Comment Button (toggles visibility)
+                 if (event.target.closest('.comment-button')) {
+                     event.preventDefault();
+                     const button = event.target.closest('.comment-button');
+                     const postId = parseInt(button.dataset.postId);
+                     toggleComments(postId);
+                      return;
+                 }
+                 // Comment Form Submit
+                 if (event.target.closest('.comment-form')) {
+                     if (event.type === 'submit') {
+                         event.preventDefault();
+                         handleCommentSubmit(event);
+                     }
+                      return;
+                 }
+             };
+
+             // Remove old listeners before adding new ones to prevent duplicates
+             feedContainer?.removeEventListener('click', delegateHandler);
+             feedContainer?.removeEventListener('submit', delegateHandler);
+             profileContainer?.removeEventListener('click', delegateHandler);
+             profileContainer?.removeEventListener('submit', delegateHandler);
+
+             // Add new listeners
+             feedContainer?.addEventListener('click', delegateHandler);
+             feedContainer?.addEventListener('submit', delegateHandler);
+             profileContainer?.addEventListener('click', delegateHandler);
+             profileContainer?.addEventListener('submit', delegateHandler);
+         }
+
+         // Utility to escape HTML to prevent XSS in content display
+         function escapeHtml(unsafe) {
+             if (!unsafe) return '';
+             return unsafe
+                  .replace(/&/g, "&amp;")
+                  .replace(/</g, "&lt;")
+                  .replace(/>/g, "&gt;")
+                  .replace(/"/g, "&quot;")
+                  .replace(/'/g, "&#039;");
+         }
+
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Setup form listeners
+            document.getElementById('login-form').addEventListener('submit', handleLogin);
+            document.getElementById('register-form').addEventListener('submit', handleRegister);
+            document.getElementById('create-post-form').addEventListener('submit', handleCreatePost);
+
+            // Setup search listener
+            searchInput.addEventListener('input', (e) => {
+                 debouncedSearch(e.target.value);
+             });
+            // Hide search results when clicking outside
+            document.addEventListener('click', (event) => {
+                if (!navbarSearchContainer.contains(event.target)) {
+                    hideSearchResults();
+                }
+            });
+            // Also hide results on focus out, unless focus moves to results
+            searchInput.addEventListener('blur', (event) => {
+                // Delay slightly to allow click on results to register
+                setTimeout(() => {
+                    if (!searchResultsContainer.contains(document.activeElement)) {
+                         hideSearchResults();
+                    }
+                }, 100);
+            });
+
+
+             // Close post actions dropdowns if clicking outside
+             document.addEventListener('click', function(event) {
+                if (!event.target.closest('.post-actions-menu')) {
+                    document.querySelectorAll('.post-actions-dropdown').forEach(d => {
+                        d.style.display = 'none';
+                    });
+                }
+             });
+
+            showLoginView();
+        });
+
+         // --- Global View Functions (callable from HTML onclick) ---
+         window.showLoginView = () => showView('login');
+         window.showRegisterView = () => showView('register');
+         window.showFeedView = () => { if(currentUser) showView('feed'); renderFeed(); };
+         window.showProfileView = (userId) => { if(currentUser) showView('profile'); renderProfile(userId); };
+         window.showUserListView = () => { if(currentUser) showView('user-list'); renderUserList(); };
+         window.handleLogout = handleLogout;
+         window.handleFollowToggle = handleFollowToggle;
+         window.handleFollowUnfollow = handleFollowUnfollow;
+         window.handleFollowToggleFromList = handleFollowToggleFromList;
+         window.toggleComments = toggleComments;
+         window.togglePostActionsDropdown = togglePostActionsDropdown;
+         window.handleDeletePost = handleDeletePost;
+         window.handleEditPost = handleEditPost;
+          window.handleDeleteComment = handleDeleteComment;
+          window.handleEditComment = handleEditComment;
+          window.navigateToProfile = navigateToProfile; // Expose for search results
+
+
+    </script>
+
+</body>
+</html>
